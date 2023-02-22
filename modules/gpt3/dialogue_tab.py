@@ -172,7 +172,7 @@ def create_tab(CONFIG):
 
             with gr.Column():
                 state = gr.State([])
-                chatbot = gr.Chatbot(lines=6)
+                chatbot = gr.Chatbot()
                 txt = gr.Textbox(show_label=False, lines=2, placeholder='Enter text and press enter').style(container=False)
 
                 txt.submit(

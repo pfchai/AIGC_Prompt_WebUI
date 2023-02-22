@@ -3,4 +3,4 @@ python-dotenv
 openai
 tiktoken
 
-gradio
+gradio==3.18.0
