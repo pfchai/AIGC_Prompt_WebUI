@@ -132,7 +132,7 @@ def create_tab(CONFIG):
 
         with gr.Row():
             with gr.Column():
-                prologue = gr.Textbox(
+                com_prologue = gr.Textbox(
                     label='prologue',
                     value='You are ChatGPT, a large language model trained by OpenAI. Respond conversationally. Do not answer as the user.',
                     lines=6,
@@ -140,7 +140,7 @@ def create_tab(CONFIG):
                     interactive=True,
                 )
 
-                example_query = gr.Textbox(
+                com_example_query = gr.Textbox(
                     label='query example',
                     value='Hello',
                     lines=1,
@@ -148,7 +148,7 @@ def create_tab(CONFIG):
                     interactive=True,
                 )
 
-                example_response = gr.Textbox(
+                com_example_response = gr.Textbox(
                     label='response example',
                     value='Hello! How can I help you today?',
                     lines=1,
@@ -156,14 +156,14 @@ def create_tab(CONFIG):
                 )
 
                 with gr.Row():
-                    temperature = gr.Slider(
+                    com_temperature = gr.Slider(
                         0, 1,
                         value=0.5,
                         label='temperature',
                         interactive=True,
                     )
 
-                    max_tokens = gr.Slider(
+                    com_max_tokens = gr.Slider(
                         500, 4000,
                         value=4000,
                         label='max_tokens',
@@ -171,33 +171,33 @@ def create_tab(CONFIG):
                     )
 
             with gr.Column():
-                state = gr.State([])
-                chatbot = gr.Chatbot()
-                txt = gr.Textbox(show_label=False, lines=2, placeholder='Enter text and press enter').style(container=False)
+                com_chat_state = gr.State([])
+                com_chatbot = gr.Chatbot()
+                com_reply = gr.Textbox(show_label=False, lines=1, placeholder='Enter text and press enter').style(container=False)
 
-                txt.submit(
+                com_reply.submit(
                     ask_gpt3,
-                    [txt, prologue, example_query, example_response, max_tokens, temperature, state, com_gpt_engine],
-                    [txt, chatbot, state],
+                    [com_reply, com_prologue, com_example_query, com_example_response, com_max_tokens, com_temperature, com_chat_state, com_gpt_engine],
+                    [com_reply, com_chatbot, com_chat_state],
                     show_progress=True
                 )
 
                 with gr.Row():
-                    clear_button = gr.Button(value='Clear dialogue', elem_id='warning_button')
-                    clear_button.click(lambda *args: (None, []), inputs=[chatbot, state], outputs=[chatbot, state])
+                    com_clear_button = gr.Button(value='Clear dialogue', elem_id='warning_button')
+                    com_clear_button.click(lambda *args: (None, []), inputs=[com_chatbot, com_chat_state], outputs=[com_chatbot, com_chat_state])
 
-                    submit_button = gr.Button(value='Submit')
-                    submit_button.click(
+                    com_submit_button = gr.Button(value='Submit')
+                    com_submit_button.click(
                         ask_gpt3,
-                        inputs=[txt, prologue, example_query, example_response, max_tokens, temperature, state, com_gpt_engine],
-                        outputs=[txt, chatbot, state],
+                        inputs=[com_reply, com_prologue, com_example_query, com_example_response, com_max_tokens, com_temperature, com_chat_state, com_gpt_engine],
+                        outputs=[com_reply, com_chatbot, com_chat_state],
                         show_progress=True
                     )
 
         gr.Examples(
             get_examples(),
-            [prologue, example_query, example_response],
-            [prologue, example_query, example_response],
+            [com_prologue, com_example_query, com_example_response],
+            [com_prologue, com_example_query, com_example_response],
             fn = lambda *args: args,
             cache_examples=False
         )
