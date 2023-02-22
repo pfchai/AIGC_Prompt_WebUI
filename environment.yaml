@@ -1,0 +1,11 @@
+# run: conda env create --file environment.yaml
+name: apw
+channels:
+  - defaults
+dependencies:
+  - python==3.10
+  - ipykernel
+  - pip
+  - pip:
+    - -r requirements.txt
+
