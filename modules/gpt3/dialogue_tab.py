@@ -64,12 +64,14 @@ def ask_gpt3(
     logger.debug('accept request from %s user-agent %s', request.client.host, request.headers['user-agent'])
     logger.debug('query %s', input)
 
+    log_str = ''
     prompter = GPT3Prompt(
         max_token=max_tokens, prologue=prologue,
         example_query=example_query,
         example_response=example_response
     )
     prompt, history = prompter.encode(input, history, 'User')
+    log_str += 'request tokens {}\n'.format(len(prompt))
 
     log_req_info = {
         'prologue': prologue,
@@ -95,10 +97,11 @@ def ask_gpt3(
         response = parse_completion(completion)
     except Exception as e:
         logger.error(e, exc_info=True)
-        return input, history, history
+        log_str += str(e) + '\n'
+        return input, history, history, log_str
 
     history = history + [[input, response]]
-    return '', history, history
+    return '', history, history, log_str
 
 
 def create_tab(CONFIG):
@@ -175,24 +178,15 @@ def create_tab(CONFIG):
                 com_chatbot = gr.Chatbot()
                 com_reply = gr.Textbox(show_label=False, lines=1, placeholder='Enter text and press enter').style(container=False)
 
-                com_reply.submit(
-                    ask_gpt3,
-                    [com_reply, com_prologue, com_example_query, com_example_response, com_max_tokens, com_temperature, com_chat_state, com_gpt_engine],
-                    [com_reply, com_chatbot, com_chat_state],
-                    show_progress=True
-                )
-
                 with gr.Row():
                     com_clear_button = gr.Button(value='Clear dialogue', elem_id='warning_button')
                     com_clear_button.click(lambda *args: (None, []), inputs=[com_chatbot, com_chat_state], outputs=[com_chatbot, com_chat_state])
 
                     com_submit_button = gr.Button(value='Submit')
-                    com_submit_button.click(
-                        ask_gpt3,
-                        inputs=[com_reply, com_prologue, com_example_query, com_example_response, com_max_tokens, com_temperature, com_chat_state, com_gpt_engine],
-                        outputs=[com_reply, com_chatbot, com_chat_state],
-                        show_progress=True
-                    )
+
+        with gr.Row():
+            with gr.Accordion('log info', open=False):
+                com_log_show = gr.TextArea(label='log info')
 
         gr.Examples(
             get_examples(),
@@ -201,5 +195,20 @@ def create_tab(CONFIG):
             fn = lambda *args: args,
             cache_examples=False
         )
-        
+
+        ask_gpt3_inputs = [com_reply, com_prologue, com_example_query, com_example_response, com_max_tokens, com_temperature, com_chat_state, com_gpt_engine]
+        ask_gpt3_outputs = [com_reply, com_chatbot, com_chat_state, com_log_show]
+        com_reply.submit(
+            ask_gpt3,
+            ask_gpt3_inputs,
+            ask_gpt3_outputs,
+            show_progress=True
+        )
+        com_submit_button.click(
+            ask_gpt3,
+            inputs=ask_gpt3_inputs,
+            outputs=ask_gpt3_outputs,
+            show_progress=True
+        )
+
     return tab
